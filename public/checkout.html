@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Checkout - Bobby Mall</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h2 class="page-title">Checkout</h2>
+
+<div class="checkout-box">
+  <h3>Delivery Details</h3>
+
+  <input id="name" type="text" placeholder="Full Name" required>
+  <input id="phone" type="text" placeholder="Mobile Number" required>
+  <textarea id="address" placeholder="Full Address" required></textarea>
+
+  <h3>Payment Method</h3>
+  <select id="payment">
+    <option value="Cash on Delivery">Cash on Delivery</option>
+    <option value="UPI">UPI</option>
+  </select>
+
+  <button class="checkout-btn full" onclick="placeOrder()">Place Order</button>
+</div>
+
+<script>
+function placeOrder() {
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const address = document.getElementById("address").value.trim();
+  const payment = document.getElementById("payment").value;
+
+  if (!name || !phone || !address) {
+    alert("Please fill all details");
+    return;
+  }
+
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  if (cart.length === 0) {
+    alert("Your cart is empty");
+    return;
+  }
+
+  const total = cart.reduce((sum, item) => {
+    return sum + item.price * item.qty;
+  }, 0);
+
+  fetch("/api/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      products: cart,
+      total: total,
+      paymentMethod: payment,
+      address: `${name}, ${phone}, ${address}`
+    })
+  })
+  .then(res => {
+    if (!res.ok) {
+      throw new Error("Order failed");
+    }
+    return res.json();
+  })
+  .then(() => {
+    localStorage.removeItem("cart");
+    window.location.href = "/success.html";
+  })
+  .catch(err => {
+    console.error(err);
+    alert("❌ Order not saved. Check console.");
+  });
+}
+</script>
+
+</body>
+</html>

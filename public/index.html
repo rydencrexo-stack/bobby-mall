@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bobby Mall</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<header class="navbar">
+  <h1 class="logo">Bobby Mall</h1>
+  <nav>
+    <a href="#">Home</a>
+    <a href="#products">Shop</a>
+    <a href="cart.html">Cart</a>
+    <a href="checkout.html">Checkout</a>
+    <a href="admin.html">Admin</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h2>Elegance That Defines You</h2>
+  <p>Ladies Wear & Premium Perfumes</p>
+</section>
+
+<section id="products" class="product-grid">
+  <!-- Products load here -->
+</section>
+
+<script src="script.js"></script>
+
+<!-- CHECKOUT POPUP -->
+<div id="checkoutPopup" class="checkout-popup">
+  <p>Item added to cart</p>
+  <div>
+    <a href="cart.html" class="popup-btn">Go to Cart</a>
+    <button onclick="closePopup()" class="popup-btn outline">Continue</button>
+  </div>
+</div>
+
+</body>
+</html>

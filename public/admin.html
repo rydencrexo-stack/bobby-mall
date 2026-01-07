@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard - Bobby Mall</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h2 class="page-title">Admin Dashboard</h2>
+
+<div class="admin-section">
+  <h3>Add Product</h3>
+
+  <input id="name" placeholder="Product Name">
+  <input id="price" placeholder="Price">
+  <input id="category" placeholder="Category">
+  <input id="image" placeholder="Image URL">
+  <textarea id="description" placeholder="Description"></textarea>
+
+  <button onclick="addProduct()" class="checkout-btn">Add Product</button>
+</div>
+
+<hr style="margin:40px">
+
+<h3 style="text-align:center">Orders</h3>
+<div id="orders" class="orders-box"></div>
+
+<script src="script.js"></script>
+<script>
+fetch("/api/orders")
+  .then(res => res.json())
+  .then(orders => {
+    const box = document.getElementById("orders");
+
+    if (orders.length === 0) {
+      box.innerHTML = "<p style='text-align:center'>No orders yet</p>";
+      return;
+    }
+
+    box.innerHTML = orders.map(o => `
+      <div class="order-card">
+        <p><b>Date:</b> ${new Date(o.createdAt).toLocaleString()}</p>
+        <p><b>Payment:</b> ${o.paymentMethod}</p>
+        <p><b>Total:</b> ₹${o.total}</p>
+        <p><b>Address:</b> ${o.address}</p>
+
+        <p><b>Products:</b></p>
+        <ul>
+          ${o.products.map(p => `<li>${p.name} × ${p.qty}</li>`).join("")}
+        </ul>
+      </div>
+    `).join("");
+  });
+</script>
+
+</body>
+</html>

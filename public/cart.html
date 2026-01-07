@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cart - Bobby Mall</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<h2 class="page-title">Your Cart</h2>
+
+<div id="cart" class="product-grid"></div>
+
+<h3 id="total" class="total-text"></h3>
+
+<div class="center">
+  <a href="checkout.html" class="checkout-btn">Proceed to Checkout</a>
+</div>
+
+<script>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+const container = document.getElementById("cart");
+
+function renderCart() {
+  let total = 0;
+
+  if (cart.length === 0) {
+    container.innerHTML = "<p style='text-align:center'>Cart is empty</p>";
+    document.getElementById("total").innerText = "";
+    return;
+  }
+
+  container.innerHTML = cart.map((item, index) => {
+    total += item.price * item.qty;
+    return `
+      <div class="card">
+        <img src="${item.image || 'https://via.placeholder.com/300'}" />
+        <h3>${item.name}</h3>
+        <p>₹${item.price}</p>
+
+        <div class="qty-controls">
+          <button onclick="decreaseQty(${index})">−</button>
+          <span>${item.qty}</span>
+          <button onclick="increaseQty(${index})">+</button>
+        </div>
+
+        <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("total").innerText = "Total: ₹" + total;
+}
+
+function increaseQty(index) {
+  cart[index].qty += 1;
+  save();
+}
+
+function decreaseQty(index) {
+  if (cart[index].qty > 1) {
+    cart[index].qty -= 1;
+  }
+  save();
+}
+
+function removeItem(index) {
+  cart.splice(index, 1);
+  save();
+}
+
+function save() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+  renderCart();
+}
+
+renderCart();
+</script>
+
+</body>
+</html>
