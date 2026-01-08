@@ -5,6 +5,7 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<a href="/" class="back-home">← Back to Home</a>
 
 <h2 class="page-title">Admin Dashboard</h2>
 
@@ -52,6 +53,26 @@ fetch("/api/orders")
     `).join("");
   });
 </script>
+<style>
+  .back-home {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    text-decoration: none;
+    background: #fff;
+    border: 1px solid #000;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    color: #000;
+    z-index: 9999;
+  }
+
+  .back-home:hover {
+    background: #000;
+    color: #fff;
+  }
+</style>
 
 </body>
 </html>

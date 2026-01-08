@@ -4,78 +4,216 @@
   <meta charset="UTF-8">
   <title>Checkout - Bobby Mall</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Checkout polish (safe inline styles) */
+    .checkout-wrapper {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 30px;
+      padding: 20px;
+    }
+
+    .order-summary {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .order-total {
+      border-top: 1px solid #ddd;
+      margin-top: 15px;
+      padding-top: 10px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .checkout-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .checkout-box input,
+    .checkout-box textarea,
+    .checkout-box select {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+    }
+
+    .checkout-box input[readonly] {
+      background: #f3f3f3;
+      cursor: not-allowed;
+    }
+
+    .checkout-btn.full {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 768px) {
+      .checkout-wrapper {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
+<a href="/" class="back-home">← Back to Home</a>
 
 <h2 class="page-title">Checkout</h2>
 
-<div class="checkout-box">
-  <h3>Delivery Details</h3>
+<div class="checkout-wrapper">
 
-  <input id="name" type="text" placeholder="Full Name" required>
-  <input id="phone" type="text" placeholder="Mobile Number" required>
-  <textarea id="address" placeholder="Full Address" required></textarea>
+  <!-- LEFT: DELIVERY DETAILS -->
+  <div class="checkout-box">
+    <h3>Delivery Details</h3>
 
-  <h3>Payment Method</h3>
-  <select id="payment">
-    <option value="Cash on Delivery">Cash on Delivery</option>
-    <option value="UPI">UPI</option>
-  </select>
+    <input id="name" type="text" placeholder="Full Name" readonly>
+    <input id="phone" type="text" placeholder="Mobile Number" readonly>
+    <input id="email" type="email" placeholder="Email Address" readonly>
 
-  <button class="checkout-btn full" onclick="placeOrder()">Place Order</button>
+    <textarea id="address" placeholder="Delivery Address" required></textarea>
+
+    <h3>Payment Method</h3>
+    <select id="payment">
+      <option value="Cash on Delivery">Cash on Delivery</option>
+      <option value="UPI">UPI</option>
+    </select>
+
+    <button class="checkout-btn full" onclick="placeOrder()">Place Order</button>
+  </div>
+
+  <!-- RIGHT: ORDER SUMMARY -->
+  <div class="order-summary">
+    <h3>Order Summary</h3>
+    <div id="summaryItems"></div>
+    <div class="order-total">
+      Total: ₹<span id="summaryTotal">0</span>
+    </div>
+  </div>
+
 </div>
 
 <script>
+/* ================= USER CHECK ================= */
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+if (!user) {
+  alert("Please login to continue checkout");
+  window.location.href = "/";
+}
+
+/* ================= AUTOFILL USER ================= */
+
+document.getElementById("name").value = user.name;
+document.getElementById("phone").value = user.phone;
+document.getElementById("email").value = user.email;
+
+/* ================= ORDER SUMMARY ================= */
+
+const cart = JSON.parse(localStorage.getItem("cart")) || [];
+const summaryItems = document.getElementById("summaryItems");
+const summaryTotal = document.getElementById("summaryTotal");
+
+let totalAmount = 0;
+
+if (cart.length === 0) {
+  summaryItems.innerHTML = "<p>Your cart is empty</p>";
+  document.querySelector(".checkout-btn").disabled = true;
+} else {
+  summaryItems.innerHTML = cart.map(item => {
+    const itemTotal = item.price * item.qty;
+    totalAmount += itemTotal;
+
+    return `
+      <div class="order-item">
+        <span>${item.name} × ${item.qty}</span>
+        <span>₹${itemTotal}</span>
+      </div>
+    `;
+  }).join("");
+
+  summaryTotal.innerText = totalAmount;
+}
+
+/* ================= PLACE ORDER ================= */
+
 function placeOrder() {
-  const name = document.getElementById("name").value.trim();
-  const phone = document.getElementById("phone").value.trim();
   const address = document.getElementById("address").value.trim();
   const payment = document.getElementById("payment").value;
 
-  if (!name || !phone || !address) {
-    alert("Please fill all details");
+  if (!address) {
+    alert("Please enter delivery address");
     return;
   }
-
-  const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
   if (cart.length === 0) {
     alert("Your cart is empty");
     return;
   }
 
-  const total = cart.reduce((sum, item) => {
-    return sum + item.price * item.qty;
-  }, 0);
-
   fetch("/api/orders", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       products: cart,
-      total: total,
+      total: totalAmount,
       paymentMethod: payment,
-      address: `${name}, ${phone}, ${address}`
+      address: `${user.name}, ${user.phone}, ${user.email}, ${address}`
     })
   })
-  .then(res => {
-    if (!res.ok) {
-      throw new Error("Order failed");
-    }
-    return res.json();
-  })
-  .then(() => {
-    localStorage.removeItem("cart");
-    window.location.href = "/success.html";
-  })
-  .catch(err => {
-    console.error(err);
-    alert("❌ Order not saved. Check console.");
-  });
+    .then(res => {
+      if (!res.ok) throw new Error("Order failed");
+      return res.json();
+    })
+    .then(() => {
+      localStorage.setItem(
+        "lastOrder",
+        JSON.stringify({
+          products: cart,
+          total: totalAmount
+        })
+      );
+
+      localStorage.removeItem("cart");
+      window.location.href = "/success.html";
+    })
+    .catch(err => {
+      console.error(err);
+      alert("❌ Order not saved. Check console.");
+    });
 }
 </script>
+<style>
+  .back-home {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    text-decoration: none;
+    background: #fff;
+    border: 1px solid #000;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    color: #000;
+    z-index: 9999;
+  }
+
+  .back-home:hover {
+    background: #000;
+    color: #fff;
+  }
+</style>
 
 </body>
 </html>

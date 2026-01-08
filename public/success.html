@@ -4,19 +4,190 @@
   <meta charset="UTF-8">
   <title>Order Successful - Bobby Mall</title>
   <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #eef5f0, #e6f2ea);
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .success-box {
+      max-width: 600px;
+      margin: 100px auto;
+      background: #fff;
+      padding: 60px 40px;
+      border-radius: 24px;
+      text-align: center;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.12);
+    }
+
+    /* ================= ZEPTO STYLE TICK ================= */
+
+    .tick-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .tick-circle {
+      width: 140px;
+      height: 140px;
+      background: #2ecc71;
+      border-radius: 50%;
+      position: relative;
+      animation: pop 0.6s cubic-bezier(.17,.89,.32,1.49);
+      box-shadow: 0 0 0 rgba(46,204,113,0.6);
+    }
+
+    /* CHECK MARK (PURE CSS – NEVER TILTS) */
+    .tick-circle::after {
+      content: "";
+      position: absolute;
+      width: 40px;
+      height: 70px;
+      border-right: 8px solid white;
+      border-bottom: 8px solid white;
+      transform: rotate(45deg);
+      left: 48px;
+      top: 28px;
+      animation: drawCheck 0.4s ease 0.4s forwards;
+      opacity: 0;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.2); opacity: 0; }
+      60% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes drawCheck {
+      to { opacity: 1; }
+    }
+
+    /* ================= SUCCESS TEXT ================= */
+
+    .success-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #1b5e20;
+      margin: 10px 0 6px;
+      animation: fadeUp 0.6s ease forwards;
+    }
+
+    .success-sub {
+      font-size: 16px;
+      color: #4e5d52;
+      animation: fadeUp 0.6s ease forwards;
+      animation-delay: 0.1s;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ================= ORDER DETAILS ================= */
+
+    .order-details {
+      display: none;
+      text-align: left;
+      margin-top: 35px;
+      animation: fadeUp 0.5s ease forwards;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .order-total {
+      border-top: 1px solid #e0e0e0;
+      margin-top: 14px;
+      padding-top: 12px;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .success-actions {
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .success-actions a {
+      padding: 14px 26px;
+      background: #000;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 14px;
+      display: inline-block;
+    }
+  </style>
 </head>
 <body>
 
-<div class="success-container">
-  <div class="checkmark-circle">
-    <div class="checkmark"></div>
+<div class="success-box">
+
+  <!-- SUCCESS STATE -->
+  <div id="tickScreen">
+    <div class="tick-wrapper">
+      <div class="tick-circle"></div>
+    </div>
+
+    <div class="success-title">Order Placed Successfully</div>
+    <div class="success-sub">
+      Thank you for shopping with <strong>Bobby Mall</strong>
+    </div>
   </div>
 
-  <h2>Order Placed Successfully!</h2>
-  <p>Thank you for shopping with Bobby Mall 💖</p>
+  <!-- ORDER DETAILS -->
+  <div class="order-details" id="orderDetails">
+    <h3>Order Summary</h3>
+    <div id="orderItems"></div>
 
-  <a href="/" class="checkout-btn">Back to Home</a>
+    <div class="order-total">
+      Total: ₹<span id="orderTotal">0</span>
+    </div>
+
+    <div class="success-actions">
+      <a href="index.html">Continue Shopping</a>
+    </div>
+  </div>
+
 </div>
+
+<script>
+/* ================= LOAD ORDER ================= */
+
+const lastOrder = JSON.parse(localStorage.getItem("lastOrder"));
+const itemsEl = document.getElementById("orderItems");
+const totalEl = document.getElementById("orderTotal");
+
+if (lastOrder) {
+  let total = 0;
+  itemsEl.innerHTML = lastOrder.products.map(item => {
+    const t = item.price * item.qty;
+    total += t;
+    return `
+      <div class="order-item">
+        <span>${item.name} × ${item.qty}</span>
+        <span>₹${t}</span>
+      </div>
+    `;
+  }).join("");
+  totalEl.innerText = total;
+}
+
+/* ================= SHOW ORDER DETAILS AFTER 3 SECONDS ================= */
+
+setTimeout(() => {
+  document.getElementById("tickScreen").style.display = "none";
+  document.getElementById("orderDetails").style.display = "block";
+}, 3000);
+</script>
 
 </body>
 </html>

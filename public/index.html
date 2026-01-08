@@ -9,11 +9,35 @@
 
 <header class="navbar">
   <h1 class="logo">Bobby Mall</h1>
+
   <nav>
     <a href="#">Home</a>
     <a href="#products">Shop</a>
-    <a href="cart.html">Cart</a>
+
+    <div class="cart-link">
+      <a href="cart.html">
+        Cart
+        <span id="cartCount" class="cart-badge">0</span>
+      </a>
+
+      <div id="miniCart" class="mini-cart">
+        <p class="mini-empty">Cart is empty</p>
+        <div class="mini-items"></div>
+        <div class="mini-footer">
+          <strong>Total: ₹<span id="miniTotal">0</span></strong>
+          <a href="cart.html" class="mini-btn">View Cart</a>
+        </div>
+      </div>
+    </div>
+
     <a href="checkout.html">Checkout</a>
+
+    <span id="userName" class="user-name" style="display:none;"></span>
+
+    <button id="logoutBtn" class="logout-btn" style="display:none;">
+      Logout
+    </button>
+
     <a href="admin.html">Admin</a>
   </nav>
 </header>
@@ -23,14 +47,10 @@
   <p>Ladies Wear & Premium Perfumes</p>
 </section>
 
-<section class="products" id="product-list">
-  <!-- products injected here by JS -->
-</section>
-
+<section id="products" class="product-grid"></section>
 
 <script src="script.js"></script>
 
-<!-- CHECKOUT POPUP -->
 <div id="checkoutPopup" class="checkout-popup">
   <p>Item added to cart</p>
   <div>
@@ -38,12 +58,96 @@
     <button onclick="closePopup()" class="popup-btn outline">Continue</button>
   </div>
 </div>
-<footer>
-  © 2026 Bobby Mall • All Rights Reserved  
-  <br>
-  Designed with ❤️
-</footer>
 
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal">
+  <div class="modal-overlay"></div>
+
+  <div class="modal-box">
+    <h2>Login / Signup</h2>
+    <p class="modal-sub">Create an account to continue</p>
+
+    <input type="text" id="loginName" placeholder="Full Name" />
+
+    <!-- PHONE WITH DEFAULT +91 -->
+    <div style="display:flex; gap:6px;">
+      <input type="text" value="+91" readonly style="width:60px; background:#f3f3f3;">
+      <input
+        type="text"
+        id="loginPhone"
+        placeholder="Phone Number"
+        maxlength="10"
+        inputmode="numeric"
+        style="flex:1;"
+      />
+    </div>
+
+    <input type="email" id="loginEmail" placeholder="Email Address" />
+    <input type="password" id="loginPassword" placeholder="Password" />
+
+    <button class="modal-btn">Continue</button>
+    <button class="modal-close">✕</button>
+  </div>
+</div>
+
+<style>
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+  }
+
+  /* 🔥 KEY FIX: overlay should NOT block clicks */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    pointer-events: none; /* ✅ THIS FIXES IT */
+  }
+
+  /* 🔥 KEY FIX: modal must accept clicks */
+  .modal-box {
+    position: relative;
+    background: #fff;
+    width: 90%;
+    max-width: 400px;
+    margin: 10% auto;
+    padding: 24px;
+    border-radius: 12px;
+    text-align: center;
+    pointer-events: auto; /* ✅ CLICKABLE */
+  }
+
+  .modal-box input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+
+  .modal-btn {
+    width: 100%;
+    padding: 12px;
+    background: #000;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .logout-btn {
+    background: transparent;
+    border: 1px solid #000;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .user-name {
+    font-weight: 600;
+    margin-right: 10px;
+  }
+</style>
 
 </body>
 </html>
