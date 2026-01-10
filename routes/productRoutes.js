@@ -1,87 +1,82 @@
 const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
-
 const multer = require("multer");
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("../config/cloudinary");
 
-/* ================= CLOUDINARY STORAGE ================= */
-
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: {
-    folder: "bobby-mall-products",
-    allowed_formats: ["jpg", "jpeg", "png", "webp"]
-  }
-});
-
+// store image in memory (NOT disk)
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-/* ================= GET ALL PRODUCTS ================= */
-
-router.get("/", async (req, res) => {
-  try {
-    const products = await Product.find();
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-/* ================= ADD PRODUCT ================= */
-
+// ADD PRODUCT
 router.post("/", upload.single("image"), async (req, res) => {
   try {
+    let imageUrl = "";
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(
+        `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`,
+        { folder: "products" }
+      );
+      imageUrl = result.secure_url;
+    }
+
     const product = new Product({
       name: req.body.name,
       price: req.body.price,
       category: req.body.category,
       description: req.body.description,
-      image: req.file.path // Cloudinary URL
+      image: imageUrl,
     });
 
     await product.save();
     res.json(product);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error(err);
+    res.status(500).json({ error: "Product upload failed" });
   }
 });
 
-/* ================= UPDATE PRODUCT ================= */
+// GET ALL PRODUCTS
+router.get("/", async (req, res) => {
+  const products = await Product.find();
+  res.json(products);
+});
 
+// UPDATE PRODUCT
 router.put("/:id", upload.single("image"), async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-
-    product.name = req.body.name;
-    product.price = req.body.price;
-    product.category = req.body.category;
-    product.description = req.body.description;
+    const updateData = {
+      name: req.body.name,
+      price: req.body.price,
+      category: req.body.category,
+      description: req.body.description,
+    };
 
     if (req.file) {
-      product.image = req.file.path; // new Cloudinary image
+      const result = await cloudinary.uploader.upload(
+        `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`,
+        { folder: "products" }
+      );
+      updateData.image = result.secure_url;
     }
 
-    await product.save();
-    res.json({ success: true });
+    const updated = await Product.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    res.json(updated);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Update failed" });
   }
 });
 
-/* ================= DELETE PRODUCT ================= */
-
+// DELETE PRODUCT
 router.delete("/:id", async (req, res) => {
-  try {
-    await Product.findByIdAndDelete(req.params.id);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  await Product.findByIdAndDelete(req.params.id);
+  res.json({ success: true });
 });
 
 module.exports = router;
