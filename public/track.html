@@ -1,9 +1,150 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Track Order</title>
+  <meta charset="UTF-8">
+  <title>My Orders - Bobby Mall</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<h2>Order tracking coming soon</h2>
+
+<a href="/" class="back-home">← Back to Home</a>
+
+<h2 class="page-title">My Orders</h2>
+
+<div id="ordersContainer" class="orders-container"></div>
+
+<script>
+/* ================= LOGIN CHECK ================= */
+
+const user = JSON.parse(localStorage.getItem("user"));
+if (!user) {
+  alert("Please login to view your orders");
+  window.location.href = "/";
+}
+
+/* ================= LOAD ORDERS ================= */
+
+fetch("/api/orders")
+  .then(res => res.json())
+  .then(orders => {
+    const container = document.getElementById("ordersContainer");
+
+    // filter orders by logged-in user email
+    const myOrders = orders.filter(o =>
+      o.address && o.address.includes(user.email)
+    );
+
+    if (myOrders.length === 0) {
+      container.innerHTML = `
+        <p style="text-align:center; margin-top:30px; font-size:16px;">
+          You haven’t placed any orders yet.
+        </p>
+        <div style="text-align:center; margin-top:15px;">
+          <a href="/" class="mini-btn">Start Shopping</a>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = myOrders.reverse().map(order => `
+      <div class="order-card">
+        <h3>Order ID: ${order._id}</h3>
+
+        ${order.products.map(p => `
+          <div class="order-item">
+            <span>${p.name} × ${p.qty}</span>
+            <span>₹${p.price * p.qty}</span>
+          </div>
+        `).join("")}
+
+        <div class="order-footer">
+          <strong>Total: ₹${order.total}</strong>
+          <span>${new Date(order.createdAt).toLocaleDateString()}</span>
+        </div>
+
+        <!-- ✅ ORDER STATUS (STEP 3 ADDITION) -->
+        <div style="margin-top:8px; font-size:13px; color:#e91e63;">
+          Status: Pending
+        </div>
+      </div>
+    `).join("");
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("ordersContainer").innerHTML = `
+      <p style="text-align:center; color:red;">
+        Failed to load orders. Please try again later.
+      </p>
+    `;
+  });
+</script>
+
+<style>
+/* ================= MY ORDERS PAGE ================= */
+
+.orders-container {
+  max-width: 700px;
+  margin: 20px auto 60px;
+  padding: 0 20px;
+}
+
+.order-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.order-card h3 {
+  margin-bottom: 12px;
+  color: #880e4f;
+  font-size: 16px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.order-footer {
+  border-top: 1px solid #eee;
+  margin-top: 12px;
+  padding-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-weight: 600;
+}
+
+/* BACK HOME */
+.back-home {
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  text-decoration: none;
+  background: #fff;
+  border: 1px solid #000;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+  color: #000;
+  z-index: 9999;
+}
+
+.back-home:hover {
+  background: #000;
+  color: #fff;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .order-card {
+    padding: 16px;
+  }
+}
+</style>
+
 </body>
 </html>

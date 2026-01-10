@@ -1,35 +1,9 @@
-/* ================= ADMIN ADD PRODUCT ================= */
-
-function addProduct() {
-  const name = document.getElementById("name").value;
-  const price = document.getElementById("price").value;
-  const category = document.getElementById("category").value;
-  const image = document.getElementById("image").value;
-  const description = document.getElementById("description").value;
-
-  if (!name || !price) {
-    alert("Name and price required");
-    return;
-  }
-
-  fetch("/api/products", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, price, category, image, description })
-  })
-    .then(res => res.json())
-    .then(() => {
-      alert("✅ Product added");
-      location.reload();
-    })
-    .catch(() => alert("❌ Failed to add product"));
-}
-
 /* ================= GLOBAL ================= */
 
 const cartKey = "cart";
 let allProducts = [];
 let pendingProductId = null;
+let activeCategory = "All";
 
 /* ================= USER HELPERS ================= */
 
@@ -67,16 +41,24 @@ function saveCart(cart) {
 
 function updateCartCount() {
   const cart = getCart();
-  let totalQty = 0;
-  cart.forEach(item => totalQty += item.qty);
-
   const countEl = document.getElementById("cartCount");
-  if (countEl) {
-    countEl.innerText = totalQty;
-    countEl.classList.remove("bump");
-    void countEl.offsetWidth;
-    countEl.classList.add("bump");
+  if (!countEl) return;
+
+  let totalQty = 0;
+  cart.forEach(item => totalQty += item.qty || 0);
+
+  if (totalQty === 0) {
+    countEl.style.display = "none";
+    countEl.innerText = "";
+    return;
   }
+
+  countEl.style.display = "inline-block";
+  countEl.innerText = totalQty;
+
+  countEl.classList.remove("bump");
+  void countEl.offsetWidth;
+  countEl.classList.add("bump");
 }
 
 /* ================= MINI CART ================= */
@@ -89,8 +71,6 @@ function updateMiniCart() {
 
   if (!miniItems || !miniTotal || !emptyText) return;
 
-  let total = 0;
-
   if (cart.length === 0) {
     emptyText.style.display = "block";
     miniItems.innerHTML = "";
@@ -100,12 +80,18 @@ function updateMiniCart() {
 
   emptyText.style.display = "none";
 
+  let total = 0;
+
   miniItems.innerHTML = cart.map(item => {
-    total += item.price * item.qty;
+    const price = Number(item.price) || 0;
+    const qty = Number(item.qty) || 0;
+    const itemTotal = price * qty;
+    total += itemTotal;
+
     return `
       <div class="mini-item">
-        <span>${item.name} × ${item.qty}</span>
-        <span>₹${item.price * item.qty}</span>
+        <span>${item.name || "Item"} × ${qty}</span>
+        <span>₹${itemTotal}</span>
       </div>
     `;
   }).join("");
@@ -119,14 +105,34 @@ function updateUserUI() {
   const user = getUser();
   const userNameEl = document.getElementById("userName");
   const logoutBtn = document.getElementById("logoutBtn");
+  const ordersLink = document.getElementById("myOrdersLink");
 
-  if (user && userNameEl && logoutBtn) {
-    userNameEl.innerText = `Hi, ${user.name}`;
-    userNameEl.style.display = "inline-block";
-    logoutBtn.style.display = "inline-block";
+  if (user) {
+    if (userNameEl) {
+      userNameEl.innerText = `Hi, ${user.name}`;
+      userNameEl.style.display = "inline-block";
+    }
+    if (logoutBtn) logoutBtn.style.display = "inline-block";
+    if (ordersLink) ordersLink.style.display = "inline-block";
   } else {
     if (userNameEl) userNameEl.style.display = "none";
     if (logoutBtn) logoutBtn.style.display = "none";
+    if (ordersLink) ordersLink.style.display = "none";
+  }
+}
+
+/* ================= CATEGORY FILTER ================= */
+
+function setCategory(category) {
+  activeCategory = category;
+
+  if (category === "All") {
+    renderProducts(allProducts);
+  } else {
+    const filtered = allProducts.filter(
+      p => p.category && p.category.toLowerCase() === category.toLowerCase()
+    );
+    renderProducts(filtered);
   }
 }
 
@@ -145,7 +151,7 @@ function closePopup() {
   if (popup) popup.classList.remove("show");
 }
 
-/* ================= RENDER PRODUCTS ================= */
+/* ================= RENDER PRODUCTS (FIXED & SAFE) ================= */
 
 function renderProducts(products) {
   const container = document.getElementById("products");
@@ -154,13 +160,18 @@ function renderProducts(products) {
   const cart = getCart();
 
   container.innerHTML = products.map(p => {
+    if (!p || !p._id) return "";
+
     const item = cart.find(i => i._id === p._id);
+    const name = p.name || "Unnamed Product";
+    const price = Number(p.price) || 0;
+    const img = p.image ? p.image : "https://via.placeholder.com/300";
 
     return `
       <div class="card">
-        <img src="${p.image || 'https://via.placeholder.com/300'}" />
-        <h3>${p.name}</h3>
-        <p>₹${p.price}</p>
+        <img src="${img}" alt="${name}">
+        <h3>${name}</h3>
+        <p>₹${price}</p>
 
         ${
           item
@@ -183,11 +194,14 @@ function renderProducts(products) {
 fetch("/api/products")
   .then(res => res.json())
   .then(products => {
-    allProducts = products;
-    renderProducts(products);
+    allProducts = Array.isArray(products) ? products : [];
+    setCategory("All");
     updateCartCount();
     updateMiniCart();
     updateUserUI();
+  })
+  .catch(() => {
+    allProducts = [];
   });
 
 /* ================= ADD TO CART WITH LOGIN ================= */
@@ -205,11 +219,13 @@ function addToCart(id) {
   const cart = getCart();
   const product = allProducts.find(p => p._id === id);
 
+  if (!product) return;
+
   cart.push({ ...product, qty: 1 });
   saveCart(cart);
 
   saveScroll();
-  renderProducts(allProducts);
+  setCategory(activeCategory);
   updateCartCount();
   updateMiniCart();
   showPopup();
@@ -221,10 +237,10 @@ function increase(id) {
   const cart = getCart();
   const item = cart.find(i => i._id === id);
   if (item) item.qty += 1;
-  saveCart(cart);
 
+  saveCart(cart);
   saveScroll();
-  renderProducts(allProducts);
+  setCategory(activeCategory);
   updateCartCount();
   updateMiniCart();
 }
@@ -240,12 +256,12 @@ function decrease(id) {
 
   saveCart(cart);
   saveScroll();
-  renderProducts(allProducts);
+  setCategory(activeCategory);
   updateCartCount();
   updateMiniCart();
 }
 
-/* ================= LOGIN SUBMIT (UPDATED PHONE LOGIC ONLY) ================= */
+/* ================= LOGIN SUBMIT ================= */
 
 document.addEventListener("DOMContentLoaded", () => {
   const loginBtn = document.querySelector(".modal-btn");
@@ -253,31 +269,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (loginBtn) {
     loginBtn.addEventListener("click", () => {
-      const name = document.getElementById("loginName").value.trim();
-      let phone = document.getElementById("loginPhone").value.trim();
-      const email = document.getElementById("loginEmail").value.trim();
-      const password = document.getElementById("loginPassword").value.trim();
+      const name = loginName.value.trim();
+      const phoneRaw = loginPhone.value.trim();
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value.trim();
 
-      if (!name || !phone || !email || !password) {
+      if (!name || !phoneRaw || !email || !password) {
         alert("Please fill all details");
         return;
       }
 
-      if (!email.toLowerCase().endsWith("@gmail.com")) {
-        alert("Please use a Gmail address ending with @gmail.com");
-        return;
-      }
+      saveUser({
+        name,
+        phone: "+91" + phoneRaw,
+        email,
+        password
+      });
 
-      // ✅ NEW: phone must be exactly 10 digits
-      if (!/^\d{10}$/.test(phone)) {
-        alert("Please enter a valid 10-digit mobile number");
-        return;
-      }
-
-      // attach +91 internally
-      phone = "+91" + phone;
-
-      saveUser({ name, phone, email, password });
       closeLoginModal();
       updateUserUI();
 
@@ -289,10 +297,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (closeBtn) closeBtn.addEventListener("click", closeLoginModal);
-
-  updateUserUI();
-  updateCartCount();
-  updateMiniCart();
 });
 
 /* ================= LOGOUT ================= */
@@ -303,7 +307,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
       localStorage.removeItem("user");
-      alert("You have been logged out");
       location.reload();
     });
   }

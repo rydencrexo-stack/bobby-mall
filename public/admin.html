@@ -1,78 +1,332 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Admin Dashboard - Bobby Mall</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<title>Admin Panel - Bobby Mall</title>
+
+<style>
+*{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
+body{margin:0;background:#f4f6f8}
+
+/* ================= LOGIN ================= */
+.admin-login{
+  max-width:360px;
+  margin:100px auto;
+  background:#fff;
+  padding:30px;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,.15);
+}
+.admin-login h2{text-align:center;margin-bottom:20px}
+.admin-login input{
+  width:100%;
+  padding:12px;
+  margin:10px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+.checkout-btn{
+  width:100%;
+  padding:12px;
+  background:#ff5722;
+  border:none;
+  color:#fff;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:15px;
+}
+
+/* ================= LAYOUT ================= */
+.admin-wrapper{
+  display:flex;
+  min-height:100vh;
+}
+
+/* ================= SIDEBAR ================= */
+.admin-sidebar{
+  width:230px;
+  background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
+  color:#fff;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  animation:slideIn .6s ease;
+}
+@keyframes slideIn{
+  from{transform:translateX(-40px);opacity:0}
+  to{transform:translateX(0);opacity:1}
+}
+
+.sidebar-home{
+  color:#fff;
+  text-decoration:none;
+  margin-bottom:15px;
+  font-size:14px;
+  opacity:.85;
+  transition:.3s;
+}
+.sidebar-home:hover{padding-left:10px}
+
+.sidebar-title{
+  font-size:18px;
+  margin-bottom:20px;
+}
+
+.sidebar-btn{
+  background:rgba(255,255,255,.08);
+  color:#fff;
+  border:none;
+  padding:12px;
+  margin:6px 0;
+  border-radius:10px;
+  cursor:pointer;
+  text-align:left;
+  transition:.3s;
+}
+.sidebar-btn:hover{
+  background:rgba(255,255,255,.18);
+  padding-left:18px;
+}
+.sidebar-btn.active{
+  background:#ff5722;
+}
+
+.logout-btn{
+  margin-top:auto;
+  background:#b71c1c;
+}
+.logout-btn:hover{background:#d32f2f}
+
+/* ================= MAIN ================= */
+.admin-main{
+  flex:1;
+  padding:30px;
+}
+
+/* ================= ADD PRODUCT CARD ================= */
+.add-card{
+  max-width:420px;
+  margin:0 auto 40px;
+  background:#fff;
+  padding:30px;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,.15);
+}
+.add-card h3{text-align:center;margin-bottom:20px}
+.add-card input,.add-card textarea{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+/* ================= PRODUCTS ================= */
+.products-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:20px;
+}
+.product-card{
+  background:#fff;
+  padding:15px;
+  border-radius:14px;
+  box-shadow:0 6px 18px rgba(0,0,0,.15);
+  text-align:center;
+}
+.product-card img{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+  border-radius:10px;
+}
+.product-card h4{margin:10px 0 5px}
+.product-card p{margin:0;font-size:14px}
+.edit-btn{
+  background:#9c27b0;
+  color:#fff;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  margin:8px 4px;
+  cursor:pointer;
+}
+.delete-btn{
+  background:#d32f2f;
+  color:#fff;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+/* ================= MODAL ================= */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:999;
+}
+.modal-box{
+  background:#fff;
+  width:90%;
+  max-width:400px;
+  margin:10% auto;
+  padding:25px;
+  border-radius:12px;
+}
+
+/* ================= TOAST ================= */
+.toast{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#323232;
+  color:#fff;
+  padding:12px 18px;
+  border-radius:8px;
+  display:none;
+}
+.toast.show{display:block}
+</style>
 </head>
+
 <body>
-<a href="/" class="back-home">← Back to Home</a>
 
-<h2 class="page-title">Admin Dashboard</h2>
-
-<div class="admin-section">
-  <h3>Add Product</h3>
-
-  <input id="name" placeholder="Product Name">
-  <input id="price" placeholder="Price">
-  <input id="category" placeholder="Category">
-  <input id="image" placeholder="Image URL">
-  <textarea id="description" placeholder="Description"></textarea>
-
-  <button onclick="addProduct()" class="checkout-btn">Add Product</button>
+<!-- ================= LOGIN ================= -->
+<div id="loginBox" class="admin-login">
+  <h2>Admin Login</h2>
+  <input id="adminUsername" placeholder="Username">
+  <input id="adminPassword" type="password" placeholder="Password">
+  <button class="checkout-btn" onclick="login()">Login</button>
 </div>
 
-<hr style="margin:40px">
+<!-- ================= DASHBOARD ================= -->
+<div id="dashboard" style="display:none">
+  <div class="admin-wrapper">
 
-<h3 style="text-align:center">Orders</h3>
-<div id="orders" class="orders-box"></div>
+    <!-- SIDEBAR -->
+    <div class="admin-sidebar">
+      <a href="/" class="sidebar-home">← Back to Home</a>
+      <div class="sidebar-title">Admin Panel</div>
 
-<script src="script.js"></script>
+      <button class="sidebar-btn active" onclick="showProducts()">Products</button>
+      <button class="sidebar-btn" onclick="showOrders()">Orders</button>
+
+      <button class="sidebar-btn logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <!-- MAIN -->
+    <div class="admin-main">
+
+      <!-- ADD PRODUCT -->
+      <div class="add-card">
+        <h3>Add New Product</h3>
+        <form id="productForm">
+          <input name="name" placeholder="Product Name" required>
+          <input name="price" type="number" placeholder="Price" required>
+          <input name="category" placeholder="Category" required>
+          <input name="image" type="file" required>
+          <textarea name="description" placeholder="Description"></textarea>
+          <button class="checkout-btn">Add Product</button>
+        </form>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div class="products-grid" id="products"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal" id="editModal">
+  <div class="modal-box">
+    <h3>Edit Product</h3>
+    <input id="editName">
+    <input id="editPrice" type="number">
+    <input id="editCategory">
+    <textarea id="editDesc"></textarea>
+    <input id="editImage" type="file">
+    <button class="checkout-btn" onclick="updateProduct()">Update</button>
+    <button class="checkout-btn" style="background:#999" onclick="closeEdit()">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Product Added Successfully</div>
+
 <script>
-fetch("/api/orders")
-  .then(res => res.json())
-  .then(orders => {
-    const box = document.getElementById("orders");
+const ADMIN_USER="admin",ADMIN_PASS="admin123";
+let editId=null;
 
-    if (orders.length === 0) {
-      box.innerHTML = "<p style='text-align:center'>No orders yet</p>";
-      return;
-    }
+function login(){
+  if(adminUsername.value===ADMIN_USER && adminPassword.value===ADMIN_PASS){
+    localStorage.setItem("admin","1");
+    loginBox.style.display="none";
+    dashboard.style.display="block";
+    loadProducts();
+  }
+}
+if(localStorage.getItem("admin")){login();}
 
-    box.innerHTML = orders.map(o => `
-      <div class="order-card">
-        <p><b>Date:</b> ${new Date(o.createdAt).toLocaleString()}</p>
-        <p><b>Payment:</b> ${o.paymentMethod}</p>
-        <p><b>Total:</b> ₹${o.total}</p>
-        <p><b>Address:</b> ${o.address}</p>
+function logout(){
+  localStorage.removeItem("admin");
+  location.reload();
+}
 
-        <p><b>Products:</b></p>
-        <ul>
-          ${o.products.map(p => `<li>${p.name} × ${p.qty}</li>`).join("")}
-        </ul>
+productForm.onsubmit=e=>{
+  e.preventDefault();
+  fetch("/api/products",{method:"POST",body:new FormData(productForm)})
+  .then(()=>{toast();productForm.reset();loadProducts();});
+};
+
+function loadProducts(){
+  fetch("/api/products").then(r=>r.json()).then(data=>{
+    products.innerHTML=data.map(p=>`
+      <div class="product-card">
+        <img src="${p.image}">
+        <h4>${p.name}</h4>
+        <p>₹${p.price}</p>
+        <button class="edit-btn" onclick='edit("${p._id}","${p.name}","${p.price}","${p.category}","${p.description||""}")'>Edit</button>
+        <button class="delete-btn" onclick='del("${p._id}")'>Delete</button>
       </div>
     `).join("");
   });
+}
+
+function edit(id,n,p,c,d){
+  editId=id;
+  editName.value=n;
+  editPrice.value=p;
+  editCategory.value=c;
+  editDesc.value=d;
+  editModal.style.display="block";
+}
+function closeEdit(){editModal.style.display="none";}
+
+function updateProduct(){
+  const fd=new FormData();
+  fd.append("name",editName.value);
+  fd.append("price",editPrice.value);
+  fd.append("category",editCategory.value);
+  fd.append("description",editDesc.value);
+  if(editImage.files[0])fd.append("image",editImage.files[0]);
+  fetch("/api/products/"+editId,{method:"PUT",body:fd})
+  .then(()=>{closeEdit();loadProducts();});
+}
+
+function del(id){
+  if(confirm("Are you sure you want to delete this product?")){
+    fetch("/api/products/"+id,{method:"DELETE"}).then(loadProducts);
+  }
+}
+
+function toast(){
+  const t=document.getElementById("toast");
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),3000);
+}
 </script>
-<style>
-  .back-home {
-    position: fixed;
-    top: 15px;
-    left: 15px;
-    text-decoration: none;
-    background: #fff;
-    border: 1px solid #000;
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-weight: 500;
-    color: #000;
-    z-index: 9999;
-  }
-
-  .back-home:hover {
-    background: #000;
-    color: #fff;
-  }
-</style>
-
 </body>
 </html>

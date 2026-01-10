@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
 
-  <!-- ✅ MOBILE RESPONSIVE FIX (MUST HAVE) -->
+  <!-- ✅ MOBILE RESPONSIVE FIX -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Bobby Mall</title>
@@ -12,6 +12,7 @@
 
 <body>
 
+<!-- ================= NAVBAR ================= -->
 <header class="navbar">
   <h1 class="logo">Bobby Mall</h1>
 
@@ -25,6 +26,7 @@
         <span id="cartCount" class="cart-badge">0</span>
       </a>
 
+      <!-- MINI CART -->
       <div id="miniCart" class="mini-cart">
         <p class="mini-empty">Cart is empty</p>
         <div class="mini-items"></div>
@@ -37,6 +39,9 @@
 
     <a href="checkout.html">Checkout</a>
 
+    <!-- MY ORDERS -->
+    <a href="track.html" id="myOrdersLink" style="display:none;">My Orders</a>
+
     <span id="userName" class="user-name" style="display:none;"></span>
 
     <button id="logoutBtn" class="logout-btn" style="display:none;">
@@ -47,15 +52,50 @@
   </nav>
 </header>
 
+<!-- ================= HERO ================= -->
 <section class="hero">
   <h2>Elegance That Defines You</h2>
   <p>Ladies Wear & Premium Perfumes</p>
 </section>
 
+<!-- ================= CATEGORY SECTION (FUNCTIONAL) ================= -->
+<section class="categories">
+  <h2 class="section-title">Shop by Category</h2>
+
+  <div class="category-grid">
+    <div class="category-card" onclick="setCategory('Ethnic Wear'); location.href='#products'">
+      <span>👘</span>
+      <h3>Ethnic Wear</h3>
+    </div>
+
+    <div class="category-card" onclick="setCategory('Western Wear'); location.href='#products'">
+      <span>👗</span>
+      <h3>Western Wear</h3>
+    </div>
+
+    <div class="category-card" onclick="setCategory('Perfumes'); location.href='#products'">
+      <span>🧴</span>
+      <h3>Perfumes</h3>
+    </div>
+
+    <div class="category-card" onclick="setCategory('Accessories'); location.href='#products'">
+      <span>👜</span>
+      <h3>Accessories</h3>
+    </div>
+
+    <div class="category-card" onclick="setCategory('New Arrivals'); location.href='#products'">
+      <span>🔥</span>
+      <h3>New Arrivals</h3>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRODUCTS ================= -->
 <section id="products" class="product-grid"></section>
 
 <script src="script.js"></script>
 
+<!-- ================= ADD TO CART POPUP ================= -->
 <div id="checkoutPopup" class="checkout-popup">
   <p>Item added to cart</p>
   <div>
@@ -64,7 +104,7 @@
   </div>
 </div>
 
-<!-- LOGIN MODAL -->
+<!-- ================= LOGIN MODAL ================= -->
 <div id="loginModal" class="modal">
   <div class="modal-overlay"></div>
 
@@ -95,7 +135,53 @@
   </div>
 </div>
 
+<!-- ================= EXTRA STYLES ================= -->
 <style>
+  .categories {
+    padding: 40px 20px;
+    background: #fff;
+    text-align: center;
+  }
+
+  .section-title {
+    font-size: 28px;
+    margin-bottom: 25px;
+    color: #880e4f;
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 20px;
+    max-width: 900px;
+    margin: auto;
+  }
+
+  .category-card {
+    background: #fde4ec;
+    padding: 25px 15px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .category-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  }
+
+  .category-card span {
+    font-size: 32px;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .category-card h3 {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  /* LOGIN MODAL FIX */
   .modal {
     display: none;
     position: fixed;
@@ -103,15 +189,13 @@
     z-index: 9999;
   }
 
-  /* 🔥 KEY FIX: overlay should NOT block clicks */
   .modal-overlay {
     position: absolute;
     inset: 0;
     background: rgba(0,0,0,0.5);
-    pointer-events: none; /* ✅ THIS FIXES IT */
+    pointer-events: none;
   }
 
-  /* 🔥 KEY FIX: modal must accept clicks */
   .modal-box {
     position: relative;
     background: #fff;
@@ -121,7 +205,7 @@
     padding: 24px;
     border-radius: 12px;
     text-align: center;
-    pointer-events: auto; /* ✅ CLICKABLE */
+    pointer-events: auto;
   }
 
   .modal-box input {
