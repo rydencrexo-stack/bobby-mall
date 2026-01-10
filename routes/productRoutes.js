@@ -2,80 +2,86 @@ const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
 const multer = require("multer");
-const cloudinary = require("../config/cloudinary");
+const path = require("path");
+const fs = require("fs");
 
-// store image in memory (NOT disk)
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+/* ================= MULTER CONFIG ================= */
 
-// ADD PRODUCT
-router.post("/", upload.single("image"), async (req, res) => {
-  try {
-    let imageUrl = "";
-
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(
-        `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`,
-        { folder: "products" }
-      );
-      imageUrl = result.secure_url;
-    }
-
-    const product = new Product({
-      name: req.body.name,
-      price: req.body.price,
-      category: req.body.category,
-      description: req.body.description,
-      image: imageUrl,
-    });
-
-    await product.save();
-    res.json(product);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Product upload failed" });
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/uploads");
+  },
+  filename: function (req, file, cb) {
+    const uniqueName =
+      Date.now() + "-" + Math.round(Math.random() * 1e9) + path.extname(file.originalname);
+    cb(null, uniqueName);
   }
 });
 
-// GET ALL PRODUCTS
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpg|jpeg|png|webp/;
+    const ext = allowed.test(path.extname(file.originalname).toLowerCase());
+    const mime = allowed.test(file.mimetype);
+
+    if (ext && mime) cb(null, true);
+    else cb(new Error("Only image files allowed"));
+  }
+});
+
+/* ================= GET PRODUCTS ================= */
 router.get("/", async (req, res) => {
   const products = await Product.find();
   res.json(products);
 });
 
-// UPDATE PRODUCT
-router.put("/:id", upload.single("image"), async (req, res) => {
-  try {
-    const updateData = {
-      name: req.body.name,
-      price: req.body.price,
-      category: req.body.category,
-      description: req.body.description,
-    };
+/* ================= ADD PRODUCT ================= */
+router.post("/", upload.single("image"), async (req, res) => {
+  const product = new Product({
+    name: req.body.name,
+    price: req.body.price,
+    category: req.body.category,
+    description: req.body.description,
+    image: req.file ? `/uploads/${req.file.filename}` : ""
+  });
 
-    if (req.file) {
-      const result = await cloudinary.uploader.upload(
-        `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`,
-        { folder: "products" }
-      );
-      updateData.image = result.secure_url;
-    }
-
-    const updated = await Product.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true }
-    );
-
-    res.json(updated);
-  } catch (err) {
-    res.status(500).json({ error: "Update failed" });
-  }
+  await product.save();
+  res.json(product);
 });
 
-// DELETE PRODUCT
+/* ================= UPDATE PRODUCT ================= */
+router.put("/:id", upload.single("image"), async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) return res.status(404).json({ error: "Not found" });
+
+  if (req.file && product.image) {
+    const oldPath = path.join("public", product.image);
+    if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+  }
+
+  product.name = req.body.name;
+  product.price = req.body.price;
+  product.category = req.body.category;
+  product.description = req.body.description;
+  if (req.file) product.image = `/uploads/${req.file.filename}`;
+
+  await product.save();
+  res.json({ success: true });
+});
+
+/* ================= DELETE PRODUCT ================= */
 router.delete("/:id", async (req, res) => {
-  await Product.findByIdAndDelete(req.params.id);
+  const product = await Product.findById(req.params.id);
+  if (!product) return res.status(404).json({ error: "Not found" });
+
+  if (product.image) {
+    const imgPath = path.join("public", product.image);
+    if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+  }
+
+  await product.deleteOne();
   res.json({ success: true });
 });
 
