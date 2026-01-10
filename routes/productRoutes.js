@@ -1,14 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const Product = require("../models/Product");
-const cloudinary = require("../config/cloudinary");
+
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const cloudinary = require("../config/cloudinary");
 
 /* ================= CLOUDINARY STORAGE ================= */
 
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
+  cloudinary,
   params: {
     folder: "bobby-mall-products",
     allowed_formats: ["jpg", "jpeg", "png", "webp"]
@@ -21,7 +22,7 @@ const upload = multer({ storage });
 
 router.get("/", async (req, res) => {
   try {
-    const products = await Product.find().sort({ _id: -1 });
+    const products = await Product.find();
     res.json(products);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -37,7 +38,7 @@ router.post("/", upload.single("image"), async (req, res) => {
       price: req.body.price,
       category: req.body.category,
       description: req.body.description,
-      image: req.file.path   // Cloudinary URL
+      image: req.file.path // Cloudinary URL
     });
 
     await product.save();
