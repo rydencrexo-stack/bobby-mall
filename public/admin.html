@@ -3,216 +3,144 @@
 <head>
 <meta charset="UTF-8">
 <title>Admin Panel - Bobby Mall</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 *{box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
 body{margin:0;background:#f4f6f8}
 
-/* ================= LOGIN ================= */
+/* ===== LOGIN ===== */
 .admin-login{
-  max-width:360px;
-  margin:100px auto;
-  background:#fff;
-  padding:30px;
-  border-radius:12px;
-  box-shadow:0 10px 25px rgba(0,0,0,.15);
+  max-width:360px;margin:100px auto;background:#fff;
+  padding:30px;border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,.15)
 }
-.admin-login h2{text-align:center;margin-bottom:20px}
+.admin-login h2{text-align:center}
 .admin-login input{
-  width:100%;
-  padding:12px;
-  margin:10px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
+  width:100%;padding:12px;margin:10px 0;
+  border-radius:8px;border:1px solid #ccc
 }
-.checkout-btn{
-  width:100%;
-  padding:12px;
-  background:#ff5722;
-  border:none;
-  color:#fff;
-  border-radius:8px;
-  cursor:pointer;
-  font-size:15px;
+.btn{
+  width:100%;padding:12px;border:none;
+  border-radius:8px;cursor:pointer;color:#fff
 }
+.btn-main{background:#ff5722}
+.btn-grey{background:#999}
+.btn-danger{background:#c62828}
 
-/* ================= LAYOUT ================= */
-.admin-wrapper{
-  display:flex;
-  min-height:100vh;
-}
+/* ===== LAYOUT ===== */
+.admin-wrapper{display:flex;min-height:100vh}
 
-/* ================= SIDEBAR ================= */
+/* ===== SIDEBAR ===== */
 .admin-sidebar{
-  width:230px;
+  width:240px;
   background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
-  color:#fff;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  animation:slideIn .6s ease;
+  color:#fff;padding:20px;
+  display:flex;flex-direction:column
 }
-@keyframes slideIn{
-  from{transform:translateX(-40px);opacity:0}
-  to{transform:translateX(0);opacity:1}
-}
-
-.sidebar-home{
-  color:#fff;
-  text-decoration:none;
-  margin-bottom:15px;
-  font-size:14px;
-  opacity:.85;
-  transition:.3s;
-}
-.sidebar-home:hover{padding-left:10px}
-
-.sidebar-title{
-  font-size:18px;
-  margin-bottom:20px;
-}
-
+.sidebar-title{font-size:18px;margin:10px 0 20px}
 .sidebar-btn{
-  background:rgba(255,255,255,.08);
-  color:#fff;
-  border:none;
-  padding:12px;
-  margin:6px 0;
-  border-radius:10px;
-  cursor:pointer;
-  text-align:left;
-  transition:.3s;
+  background:rgba(255,255,255,.1);
+  color:#fff;border:none;
+  padding:12px;margin:6px 0;
+  border-radius:10px;text-align:left;
+  cursor:pointer;transition:.3s
 }
-.sidebar-btn:hover{
-  background:rgba(255,255,255,.18);
-  padding-left:18px;
-}
-.sidebar-btn.active{
-  background:#ff5722;
-}
+.sidebar-btn:hover{padding-left:16px}
+.sidebar-btn.active{background:#ff5722}
+.logout-btn{margin-top:auto;background:#b71c1c}
 
-.logout-btn{
-  margin-top:auto;
-  background:#b71c1c;
-}
-.logout-btn:hover{background:#d32f2f}
+/* ===== MAIN ===== */
+.admin-main{flex:1;padding:30px}
 
-/* ================= MAIN ================= */
-.admin-main{
-  flex:1;
-  padding:30px;
-}
-
-/* ================= ADD PRODUCT CARD ================= */
+/* ===== ADD PRODUCT ===== */
 .add-card{
-  max-width:420px;
-  margin:0 auto 40px;
-  background:#fff;
-  padding:30px;
+  max-width:420px;margin:20px auto;
+  background:#fff;padding:30px;
   border-radius:16px;
-  box-shadow:0 10px 30px rgba(0,0,0,.15);
+  box-shadow:0 10px 30px rgba(0,0,0,.15)
 }
-.add-card h3{text-align:center;margin-bottom:20px}
+.add-card h3{text-align:center}
 .add-card input,.add-card textarea{
-  width:100%;
-  padding:12px;
-  margin:8px 0;
-  border-radius:8px;
-  border:1px solid #ccc;
+  width:100%;padding:12px;margin:8px 0;
+  border-radius:8px;border:1px solid #ccc
+}
+.preview-img{
+  width:100%;height:160px;
+  object-fit:cover;border-radius:10px;
+  margin:10px 0;display:none
 }
 
-/* ================= PRODUCTS ================= */
+/* ===== PRODUCTS ===== */
 .products-grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-  gap:20px;
+  gap:20px
 }
 .product-card{
-  background:#fff;
-  padding:15px;
+  background:#fff;padding:15px;
   border-radius:14px;
   box-shadow:0 6px 18px rgba(0,0,0,.15);
-  text-align:center;
+  text-align:center
 }
 .product-card img{
-  width:100%;
-  height:150px;
-  object-fit:cover;
-  border-radius:10px;
+  width:100%;height:150px;
+  object-fit:cover;border-radius:10px
 }
-.product-card h4{margin:10px 0 5px}
-.product-card p{margin:0;font-size:14px}
-.edit-btn{
-  background:#9c27b0;
-  color:#fff;
-  border:none;
-  padding:8px 12px;
-  border-radius:6px;
-  margin:8px 4px;
-  cursor:pointer;
-}
-.delete-btn{
-  background:#d32f2f;
-  color:#fff;
-  border:none;
-  padding:8px 12px;
-  border-radius:6px;
-  cursor:pointer;
-}
+.edit-btn{background:#7b1fa2}
+.delete-btn{background:#d32f2f}
 
-/* ================= MODAL ================= */
+/* ===== MODAL ===== */
 .modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.5);
-  z-index:999;
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.6);z-index:999
 }
 .modal-box{
-  background:#fff;
-  width:90%;
-  max-width:400px;
-  margin:10% auto;
-  padding:25px;
-  border-radius:12px;
+  background:#fff;width:90%;
+  max-width:420px;
+  margin:5% auto;padding:25px;
+  border-radius:14px
 }
 
-/* ================= TOAST ================= */
+/* ===== TOAST ===== */
 .toast{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#323232;
-  color:#fff;
-  padding:12px 18px;
-  border-radius:8px;
-  display:none;
+  position:fixed;bottom:20px;right:20px;
+  background:#333;color:#fff;
+  padding:12px 18px;border-radius:8px;
+  display:none
 }
 .toast.show{display:block}
+
+/* ===== MOBILE ===== */
+@media(max-width:768px){
+  .admin-wrapper{flex-direction:column}
+  .admin-sidebar{width:100%}
+}
 </style>
 </head>
 
 <body>
 
-<!-- ================= LOGIN ================= -->
+<!-- LOGIN -->
 <div id="loginBox" class="admin-login">
   <h2>Admin Login</h2>
   <input id="adminUsername" placeholder="Username">
   <input id="adminPassword" type="password" placeholder="Password">
-  <button class="checkout-btn" onclick="login()">Login</button>
+  <button class="btn btn-main" onclick="login()">Login</button>
 </div>
 
-<!-- ================= DASHBOARD ================= -->
+<!-- DASHBOARD -->
 <div id="dashboard" style="display:none">
   <div class="admin-wrapper">
 
     <!-- SIDEBAR -->
     <div class="admin-sidebar">
-      <a href="/" class="sidebar-home">← Back to Home</a>
+      <a href="/" class="sidebar-btn">← Back to Home</a>
       <div class="sidebar-title">Admin Panel</div>
 
-      <button class="sidebar-btn active" onclick="showProducts()">Products</button>
-      <button class="sidebar-btn" onclick="showOrders()">Orders</button>
+      <button id="btnAdd" class="sidebar-btn active" onclick="showAdd()">Add New Product</button>
+      <button id="btnProducts" class="sidebar-btn" onclick="showProducts()">Products</button>
+      <button id="btnOrders" class="sidebar-btn" onclick="showOrders()">Orders</button>
 
       <button class="sidebar-btn logout-btn" onclick="logout()">Logout</button>
     </div>
@@ -221,20 +149,32 @@ body{margin:0;background:#f4f6f8}
     <div class="admin-main">
 
       <!-- ADD PRODUCT -->
-      <div class="add-card">
-        <h3>Add New Product</h3>
-        <form id="productForm">
-          <input name="name" placeholder="Product Name" required>
-          <input name="price" type="number" placeholder="Price" required>
-          <input name="category" placeholder="Category" required>
-          <input name="image" type="file" required>
-          <textarea name="description" placeholder="Description"></textarea>
-          <button class="checkout-btn">Add Product</button>
-        </form>
+      <div id="addPage">
+        <div class="add-card">
+          <h3>Add New Product</h3>
+          <form id="productForm">
+            <input name="name" placeholder="Product Name" required>
+            <input name="price" type="number" placeholder="Price" required>
+            <input name="category" placeholder="Category" required>
+            <input id="addImage" name="image" type="file" required>
+            <img id="addPreview" class="preview-img">
+            <button type="button" class="btn btn-grey" onclick="removeAddImage()">Cancel Image</button>
+            <textarea name="description" placeholder="Description"></textarea>
+            <button class="btn btn-main">Add Product</button>
+          </form>
+        </div>
       </div>
 
       <!-- PRODUCTS -->
-      <div class="products-grid" id="products"></div>
+      <div id="productsPage" style="display:none">
+        <div class="products-grid" id="products"></div>
+      </div>
+
+      <!-- ORDERS -->
+      <div id="ordersPage" style="display:none">
+        <h2>Orders</h2>
+        <div id="orders"></div>
+      </div>
 
     </div>
   </div>
@@ -244,43 +184,89 @@ body{margin:0;background:#f4f6f8}
 <div class="modal" id="editModal">
   <div class="modal-box">
     <h3>Edit Product</h3>
+    <img id="editPreview" class="preview-img">
     <input id="editName">
     <input id="editPrice" type="number">
     <input id="editCategory">
     <textarea id="editDesc"></textarea>
     <input id="editImage" type="file">
-    <button class="checkout-btn" onclick="updateProduct()">Update</button>
-    <button class="checkout-btn" style="background:#999" onclick="closeEdit()">Cancel</button>
+    <button class="btn btn-grey" onclick="removeEditImage()">Cancel Image</button>
+    <button class="btn btn-main" onclick="updateProduct()">Update</button>
+    <button class="btn btn-grey" onclick="closeEdit()">Cancel</button>
   </div>
 </div>
 
-<div class="toast" id="toast">Product Added Successfully</div>
+<div class="toast" id="toast">Product Added</div>
 
 <script>
 const ADMIN_USER="admin",ADMIN_PASS="admin123";
 let editId=null;
 
+/* LOGIN */
 function login(){
   if(adminUsername.value===ADMIN_USER && adminPassword.value===ADMIN_PASS){
     localStorage.setItem("admin","1");
-    loginBox.style.display="none";
-    dashboard.style.display="block";
-    loadProducts();
+    init();
   }
 }
-if(localStorage.getItem("admin")){login();}
+function init(){
+  loginBox.style.display="none";
+  dashboard.style.display="block";
+  showAdd();
+}
+if(localStorage.getItem("admin")) init();
 
 function logout(){
   localStorage.removeItem("admin");
   location.reload();
 }
 
+/* PAGE SWITCH */
+function activate(btn){
+  document.querySelectorAll(".sidebar-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+}
+function showAdd(){
+  addPage.style.display="block";
+  productsPage.style.display="none";
+  ordersPage.style.display="none";
+  activate(btnAdd);
+}
+function showProducts(){
+  addPage.style.display="none";
+  productsPage.style.display="block";
+  ordersPage.style.display="none";
+  activate(btnProducts);
+  loadProducts();
+}
+function showOrders(){
+  addPage.style.display="none";
+  productsPage.style.display="none";
+  ordersPage.style.display="block";
+  activate(btnOrders);
+  loadOrders();
+}
+
+/* IMAGE PREVIEW */
+addImage.onchange=()=>preview(addImage,addPreview);
+editImage.onchange=()=>preview(editImage,editPreview);
+function preview(input,img){
+  if(input.files[0]){
+    img.src=URL.createObjectURL(input.files[0]);
+    img.style.display="block";
+  }
+}
+function removeAddImage(){addImage.value="";addPreview.style.display="none"}
+function removeEditImage(){editImage.value="";editPreview.style.display="none"}
+
+/* ADD PRODUCT */
 productForm.onsubmit=e=>{
   e.preventDefault();
   fetch("/api/products",{method:"POST",body:new FormData(productForm)})
-  .then(()=>{toast();productForm.reset();loadProducts();});
+  .then(()=>{toast();productForm.reset();removeAddImage();});
 };
 
+/* LOAD PRODUCTS */
 function loadProducts(){
   fetch("/api/products").then(r=>r.json()).then(data=>{
     products.innerHTML=data.map(p=>`
@@ -288,22 +274,25 @@ function loadProducts(){
         <img src="${p.image}">
         <h4>${p.name}</h4>
         <p>₹${p.price}</p>
-        <button class="edit-btn" onclick='edit("${p._id}","${p.name}","${p.price}","${p.category}","${p.description||""}")'>Edit</button>
-        <button class="delete-btn" onclick='del("${p._id}")'>Delete</button>
+        <button class="btn edit-btn" onclick='openEdit("${p._id}","${p.name}","${p.price}","${p.category}","${p.description||""}","${p.image}")'>Edit</button>
+        <button class="btn delete-btn" onclick="del('${p._id}')">Delete</button>
       </div>
     `).join("");
   });
 }
 
-function edit(id,n,p,c,d){
+/* EDIT */
+function openEdit(id,n,p,c,d,img){
   editId=id;
   editName.value=n;
   editPrice.value=p;
   editCategory.value=c;
   editDesc.value=d;
+  editPreview.src=img;
+  editPreview.style.display="block";
   editModal.style.display="block";
 }
-function closeEdit(){editModal.style.display="none";}
+function closeEdit(){editModal.style.display="none"}
 
 function updateProduct(){
   const fd=new FormData();
@@ -312,21 +301,36 @@ function updateProduct(){
   fd.append("category",editCategory.value);
   fd.append("description",editDesc.value);
   if(editImage.files[0])fd.append("image",editImage.files[0]);
+
   fetch("/api/products/"+editId,{method:"PUT",body:fd})
   .then(()=>{closeEdit();loadProducts();});
 }
 
+/* DELETE */
 function del(id){
-  if(confirm("Are you sure you want to delete this product?")){
+  if(confirm("Delete product?")){
     fetch("/api/products/"+id,{method:"DELETE"}).then(loadProducts);
   }
 }
 
+/* ORDERS */
+function loadOrders(){
+  fetch("/api/orders").then(r=>r.json()).then(data=>{
+    orders.innerHTML=data.map(o=>`
+      <div style="background:#fff;padding:15px;margin:10px;border-radius:10px">
+        <b>Total:</b> ₹${o.total}<br>${o.address}
+      </div>
+    `).join("");
+  });
+}
+
+/* TOAST */
 function toast(){
   const t=document.getElementById("toast");
   t.classList.add("show");
-  setTimeout(()=>t.classList.remove("show"),3000);
+  setTimeout(()=>t.classList.remove("show"),2500);
 }
 </script>
+
 </body>
 </html>
